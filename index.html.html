@@ -1,0 +1,880 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;background:#f0f2f5;color:#1a1a2e}
+.ehr-wrap{background:#f0f2f5;min-height:600px}
+
+/* ── Top bar ── */
+.topbar{background:#1b3a5c;height:40px;display:flex;align-items:center;padding:0 12px;gap:0}
+.topbar-logo{color:#fff;font-weight:700;font-size:14px;letter-spacing:.5px;padding-right:16px;border-right:1px solid rgba(255,255,255,.2);margin-right:8px}
+.topbar-logo span{color:#7ec8f4}
+.topbar-nav{display:flex;height:40px}
+.topbar-nav a{color:rgba(255,255,255,.7);font-size:12px;padding:0 12px;display:flex;align-items:center;cursor:pointer;border-bottom:2px solid transparent;text-decoration:none}
+.topbar-nav a:hover{color:#fff;background:rgba(255,255,255,.05)}
+.topbar-nav a.active{color:#fff;border-bottom-color:#7ec8f4}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.topbar-user{color:rgba(255,255,255,.8);font-size:12px}
+.topbar-time{color:rgba(255,255,255,.5);font-size:11px;font-family:monospace}
+
+/* ── Patient header ── */
+.pt-header{background:#fff;border-bottom:1px solid #d8dde6;padding:8px 16px;display:flex;align-items:center;gap:16px}
+.pt-avatar{width:36px;height:36px;border-radius:50%;background:#1b3a5c;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.pt-name{font-weight:700;font-size:15px;color:#1b3a5c}
+.pt-meta{font-size:11px;color:#666;margin-top:1px}
+.pt-tags{margin-left:auto;display:flex;gap:6px}
+.pt-tag{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600}
+.tag-dm{background:#fff3cd;color:#856404}
+.tag-ckd{background:#cfe2ff;color:#084298}
+.tag-neuropathy{background:#d1ecf1;color:#0c5460}
+.tag-active{background:#d4edda;color:#155724}
+
+/* ── Tab bar ── */
+.tab-bar{background:#e8ecf0;border-bottom:1px solid #c8cfd8;display:flex;padding:0 16px}
+.tab{padding:8px 14px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:#555;font-weight:500}
+.tab:hover{color:#1b3a5c;background:rgba(27,58,92,.05)}
+.tab.active{color:#1b3a5c;border-bottom-color:#1b3a5c;background:#fff}
+
+/* ── Main layout ── */
+.main-layout{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:520px}
+.sidebar{background:#fff;border-right:1px solid #d8dde6;padding:10px 0}
+.sidebar-section{margin-bottom:12px}
+.sidebar-title{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;padding:0 12px 6px}
+.sidebar-item{padding:6px 12px;font-size:12px;cursor:pointer;color:#333;display:flex;justify-content:space-between;align-items:center}
+.sidebar-item:hover{background:#f0f4f8;color:#1b3a5c}
+.sidebar-item.active{background:#e8f0f8;color:#1b3a5c;font-weight:600;border-left:3px solid #1b3a5c}
+.sidebar-badge{background:#e74c3c;color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;font-weight:700}
+
+/* ── Content panes ── */
+.content{padding:14px;overflow:hidden}
+.pane{display:none}
+.pane.active{display:block}
+
+/* ── Section titles ── */
+.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#555;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e0e4ea}
+
+/* ── Cards ── */
+.card{background:#fff;border:1px solid #d8dde6;border-radius:6px;padding:12px;margin-bottom:10px}
+.card-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #eee}
+
+/* ── Grid helpers ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── Form elements ── */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;font-weight:600;color:#444;margin-bottom:3px}
+.field select,.field input{width:100%;padding:6px 8px;border:1px solid #bdc3cc;border-radius:4px;font-size:12px;background:#fff;color:#1a1a2e}
+.field select:focus,.field input:focus{outline:none;border-color:#1b3a5c;box-shadow:0 0 0 2px rgba(27,58,92,.1)}
+.field input[readonly]{background:#f7f8fa;color:#666}
+.cb-group{display:flex;flex-direction:column;gap:5px}
+.cb-item{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer}
+.cb-item input{width:auto;margin:0}
+
+/* ── Buttons ── */
+.btn{cursor:pointer;border-radius:4px;font-size:12px;font-weight:600;padding:6px 14px;border:1px solid #bdc3cc;background:#fff;color:#333;transition:all .12s}
+.btn:hover{background:#f0f4f8}
+.btn-primary{background:#1b3a5c;color:#fff;border-color:#1b3a5c}
+.btn-primary:hover{background:#142d48}
+.btn-success{background:#27ae60;color:#fff;border-color:#27ae60}
+.btn-success:hover{background:#1e8449}
+.btn-warn{background:#e67e22;color:#fff;border-color:#e67e22}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-full{width:100%;padding:9px;font-size:13px;margin-top:4px}
+
+/* ── Alert card ── */
+.alert-card{border-radius:6px;padding:12px 14px;border-left:4px solid #ccc;margin-bottom:10px}
+.alert-warn{border-left-color:#e67e22;background:#fef8ee}
+.alert-critical{border-left-color:#e74c3c;background:#fdf2f2}
+.alert-ok{border-left-color:#27ae60;background:#f0faf4}
+.alert-info{border-left-color:#2980b9;background:#f0f7fd}
+.alert-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.alert-title{font-weight:700;font-size:13px}
+.indicator{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase}
+.ind-warn{background:#fde8c9;color:#935206}
+.ind-crit{background:#fad6d6;color:#8b1a1a}
+.ind-ok{background:#d4edda;color:#155724}
+.ind-info{background:#d4eaf9;color:#0d4f7c}
+.alert-body{font-size:12px;color:#444;line-height:1.5;margin-bottom:8px}
+.item-list{list-style:none;margin-bottom:8px}
+.item-list li{font-size:11px;padding:3px 0;display:flex;align-items:flex-start;gap:6px;line-height:1.4}
+.item-list li .dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;margin-top:3px}
+.dot-red{background:#e74c3c}
+.dot-green{background:#27ae60}
+.items-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.items-label.miss{color:#e74c3c}
+.items-label.pres{color:#27ae60}
+.alert-actions{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.06)}
+
+/* ── Problem list / meds ── */
+.prob-row{display:grid;grid-template-columns:80px 1fr 70px;gap:4px;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:12px;align-items:center}
+.prob-row:last-child{border-bottom:none}
+.code-badge{font-family:monospace;font-size:10px;background:#e8f0f8;color:#1b3a5c;padding:1px 5px;border-radius:3px;border:1px solid #b8cfe4}
+.prob-name{color:#222}
+.prob-date{font-size:10px;color:#888;text-align:right}
+.sev-tag{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600}
+.sev-active{background:#fde8c9;color:#935206}
+.sev-chronic{background:#cfe2ff;color:#084298}
+
+/* ── Labs ── */
+.lab-row{display:grid;grid-template-columns:140px 70px 60px 80px;gap:4px;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:12px;align-items:center}
+.lab-row:last-child{border-bottom:none}
+.lab-val{font-weight:700}
+.lab-val.high{color:#e74c3c}
+.lab-val.low{color:#2980b9}
+.lab-normal{color:#888;font-size:10px}
+.lab-flag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px}
+.flag-h{background:#fde8c9;color:#935206}
+.flag-n{background:#d4edda;color:#155724}
+.flag-old{background:#f0f0f0;color:#888}
+
+/* ── Dashboard stats ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stat-card{background:#fff;border:1px solid #d8dde6;border-radius:6px;padding:10px 12px}
+.stat-lbl{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700}
+.s-pend{color:#e67e22}.s-appr{color:#27ae60}.s-deny{color:#e74c3c}.s-total{color:#1b3a5c}
+
+/* ── PA queue table ── */
+.pa-table{width:100%;border-collapse:collapse;font-size:11px}
+.pa-table th{text-align:left;font-weight:700;color:#555;font-size:10px;text-transform:uppercase;padding:5px 8px;border-bottom:2px solid #e0e4ea;background:#f7f8fa}
+.pa-table td{padding:8px 8px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.pa-table tr:last-child td{border-bottom:none}
+.pa-table tr:hover td{background:#fafbfd}
+.status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.sb-pend{background:#fef3e2;color:#935206}
+.sb-appr{background:#d4edda;color:#155724}
+.sb-deny{background:#fad6d6;color:#8b1a1a}
+.auth-num{font-family:monospace;font-size:11px;color:#27ae60;font-weight:700}
+
+/* ── Form page ── */
+.form-section{background:#fff;border:1px solid #d8dde6;border-radius:6px;padding:12px;margin-bottom:10px}
+.form-sec-title{font-size:11px;font-weight:700;text-transform:uppercase;color:#1b3a5c;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e0e4ea}
+.confirmed-item{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;background:#f0faf4;border-radius:4px;margin-bottom:5px;font-size:12px}
+.conf-check{color:#27ae60;font-weight:700;flex-shrink:0;margin-top:1px}
+.missing-item-form{background:#fef9f0;border:1px solid #f0c070;border-radius:4px;padding:10px 12px;margin-bottom:8px}
+.miss-lbl{font-size:11px;font-weight:700;color:#7d4e00;margin-bottom:3px}
+.miss-desc{font-size:11px;color:#9a6310;margin-bottom:6px;line-height:1.4}
+.miss-input{width:100%;padding:6px 8px;border:1px solid #d4a03a;border-radius:4px;font-size:12px;background:#fff;color:#1a1a2e;font-family:inherit}
+textarea.miss-input{min-height:60px;resize:vertical}
+
+/* ── Success panel ── */
+.success-panel{background:#f0faf4;border:2px solid #27ae60;border-radius:8px;padding:24px;text-align:center}
+.success-icon{font-size:36px;margin-bottom:8px}
+.success-title{font-size:18px;font-weight:700;color:#155724;margin-bottom:6px}
+.auth-number-display{font-family:monospace;font-size:18px;font-weight:700;background:#d4edda;padding:8px 16px;border-radius:4px;display:inline-block;margin:10px 0;color:#155724}
+.success-msg{font-size:12px;color:#444;margin-bottom:14px;line-height:1.5}
+
+/* ── Vitals ── */
+.vital-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.vital-box{background:#f7f8fa;border:1px solid #e0e4ea;border-radius:4px;padding:8px 10px;text-align:center}
+.vital-lbl{font-size:10px;color:#888;margin-bottom:2px}
+.vital-val{font-size:15px;font-weight:700;color:#1b3a5c}
+.vital-unit{font-size:10px;color:#888}
+.vital-box.abnormal{background:#fef3e2;border-color:#f0c070}
+.vital-box.abnormal .vital-val{color:#935206}
+
+/* ── Spinner ── */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #ccc;border-top-color:#1b3a5c;border-radius:50%;animation:spin .5s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+<div class="ehr-wrap">
+
+<div class="topbar">
+  <div class="topbar-logo">NE<span>Health</span> EHR</div>
+  <div class="topbar-nav">
+    <a onclick="showTab('chart')" id="nav-chart" class="active">Patient Chart</a>
+    <a onclick="showTab('orders')" id="nav-orders">Order Entry</a>
+    <a onclick="showTab('dashboard')" id="nav-dashboard">PA Dashboard</a>
+    <a onclick="showTab('rules')" id="nav-rules">Rules DB</a>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-user">Dr. Anita Patel — Endocrinology</div>
+    <div class="topbar-time" id="clock">—</div>
+  </div>
+</div>
+
+<div class="pt-header">
+  <div class="pt-avatar">ST</div>
+  <div>
+    <div class="pt-name">Torres, Sandra M.</div>
+    <div class="pt-meta">DOB: 08/14/1971 (54 y) &nbsp;·&nbsp; MRN: PT-88204 &nbsp;·&nbsp; F &nbsp;·&nbsp; BCBS PPO Gold &nbsp;·&nbsp; Member ID: BCB-4421-09</div>
+  </div>
+  <div class="pt-tags">
+    <span class="pt-tag tag-dm">T2DM</span>
+    <span class="pt-tag tag-ckd">CKD Stage 2</span>
+    <span class="pt-tag tag-neuropathy">Neuropathy</span>
+    <span class="pt-tag tag-active">Active Encounter</span>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showSubtab('summary')" id="st-summary">Summary</div>
+  <div class="tab" onclick="showSubtab('problems')" id="st-problems">Problem List</div>
+  <div class="tab" onclick="showSubtab('labs')" id="st-labs">Labs &amp; Results</div>
+  <div class="tab" onclick="showSubtab('meds')" id="st-meds">Medications</div>
+  <div class="tab" onclick="showSubtab('notes')" id="st-notes">Notes</div>
+</div>
+
+<div class="main-layout">
+
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-title">Navigation</div>
+    <div class="sidebar-item active" onclick="showTab('chart')">Patient Chart</div>
+    <div class="sidebar-item" onclick="showTab('orders')">New Order &nbsp;<span class="sidebar-badge">!</span></div>
+    <div class="sidebar-item" onclick="showTab('dashboard')">PA Queue &nbsp;<span class="sidebar-badge">2</span></div>
+    <div class="sidebar-item" onclick="showTab('rules')">Payer Rules DB</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-title">Quick Info</div>
+    <div class="sidebar-item" style="cursor:default;color:#888;font-size:11px;">Allergies: NKDA</div>
+    <div class="sidebar-item" style="cursor:default;color:#888;font-size:11px;">Code: Full</div>
+    <div class="sidebar-item" style="cursor:default;color:#888;font-size:11px;">PCP: Dr. M. Chen</div>
+    <div class="sidebar-item" style="cursor:default;color:#888;font-size:11px;">Enc: Endocrinology</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-title">Alerts</div>
+    <div class="sidebar-item" style="cursor:default;font-size:11px;color:#e67e22;">HbA1c overdue (112d)</div>
+    <div class="sidebar-item" style="cursor:default;font-size:11px;color:#e74c3c;">Nephropathy — monitor</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════ CHART TAB ═══════════ -->
+<div class="pane active" id="tab-chart">
+
+  <!-- SUMMARY subtab -->
+  <div id="sub-summary">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-hdr">Vitals — today</div>
+          <div class="vital-grid">
+            <div class="vital-box"><div class="vital-lbl">BP</div><div class="vital-val">138/86</div><div class="vital-unit">mmHg</div></div>
+            <div class="vital-box"><div class="vital-lbl">HR</div><div class="vital-val">78</div><div class="vital-unit">bpm</div></div>
+            <div class="vital-box abnormal"><div class="vital-lbl">BMI</div><div class="vital-val">31.2</div><div class="vital-unit">kg/m²</div></div>
+            <div class="vital-box"><div class="vital-lbl">Temp</div><div class="vital-val">98.4</div><div class="vital-unit">°F</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">Active problems</div>
+          <div class="prob-row"><span class="code-badge">E11.65</span><span class="prob-name">T2DM w/ hyperglycemia</span><span class="sev-tag sev-active">Active</span></div>
+          <div class="prob-row"><span class="code-badge">E11.40</span><span class="prob-name">Diabetic neuropathy</span><span class="sev-tag sev-chronic">Chronic</span></div>
+          <div class="prob-row"><span class="code-badge">E11.21</span><span class="prob-name">Diabetic nephropathy</span><span class="sev-tag sev-chronic">Chronic</span></div>
+          <div class="prob-row"><span class="code-badge">N18.2</span><span class="prob-name">CKD Stage 2</span><span class="sev-tag sev-chronic">Chronic</span></div>
+          <div class="prob-row"><span class="code-badge">I10</span><span class="prob-name">Hypertension</span><span class="sev-tag sev-active">Active</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-hdr">Recent labs</div>
+          <div class="lab-row" style="font-size:10px;color:#888;padding-bottom:3px"><span>Test</span><span>Value</span><span>Flag</span><span>Date</span></div>
+          <div class="lab-row"><span>HbA1c</span><span class="lab-val high">8.7%</span><span class="lab-flag flag-h">H</span><span style="font-size:10px;color:#e74c3c">112d ago !</span></div>
+          <div class="lab-row"><span>Creatinine</span><span class="lab-val">1.3 mg/dL</span><span class="lab-flag flag-h">H</span><span style="font-size:10px;color:#888">18d ago</span></div>
+          <div class="lab-row"><span>eGFR</span><span class="lab-val">68</span><span class="lab-flag flag-n">N</span><span style="font-size:10px;color:#888">18d ago</span></div>
+          <div class="lab-row"><span>Glucose (fasting)</span><span class="lab-val high">214 mg/dL</span><span class="lab-flag flag-h">H</span><span style="font-size:10px;color:#888">today</span></div>
+          <div class="lab-row"><span>LDL Cholesterol</span><span class="lab-val">112 mg/dL</span><span class="lab-flag flag-h">H</span><span style="font-size:10px;color:#888">45d ago</span></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">Current medications</div>
+          <div class="prob-row" style="grid-template-columns:1fr 80px"><span>Metformin 1000mg BID</span><span class="prob-date">Active</span></div>
+          <div class="prob-row" style="grid-template-columns:1fr 80px"><span>Lisinopril 10mg daily</span><span class="prob-date">Active</span></div>
+          <div class="prob-row" style="grid-template-columns:1fr 80px"><span>Atorvastatin 40mg daily</span><span class="prob-date">Active</span></div>
+          <div class="prob-row" style="grid-template-columns:1fr 80px"><span>Empagliflozin 10mg daily</span><span class="prob-date">Active</span></div>
+          <div class="prob-row" style="grid-template-columns:1fr 80px"><span>Gabapentin 300mg TID</span><span class="prob-date">Active</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEMS subtab -->
+  <div id="sub-problems" style="display:none">
+    <div class="card">
+      <div class="card-hdr">Full Problem List</div>
+      <div class="prob-row"><span class="code-badge">E11.65</span><span class="prob-name">Type 2 diabetes mellitus with hyperglycemia — diagnosed 2014</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row"><span class="code-badge">E11.40</span><span class="prob-name">Type 2 diabetes mellitus with diabetic neuropathy, unspecified — diagnosed 2019</span><span class="sev-tag sev-chronic">Chronic</span></div>
+      <div class="prob-row"><span class="code-badge">E11.21</span><span class="prob-name">Type 2 diabetes mellitus with diabetic nephropathy — diagnosed 2021</span><span class="sev-tag sev-chronic">Chronic</span></div>
+      <div class="prob-row"><span class="code-badge">N18.2</span><span class="prob-name">Chronic kidney disease, Stage 2 (GFR 60–89) — diagnosed 2021</span><span class="sev-tag sev-chronic">Chronic</span></div>
+      <div class="prob-row"><span class="code-badge">I10</span><span class="prob-name">Essential (primary) hypertension — diagnosed 2016</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row"><span class="code-badge">E78.5</span><span class="prob-name">Hyperlipidemia, unspecified — diagnosed 2018</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row"><span class="code-badge">G57.60</span><span class="prob-name">Morton's neuroma, unspecified foot — diagnosed 2022</span><span class="sev-tag sev-active">Active</span></div>
+    </div>
+  </div>
+
+  <!-- LABS subtab -->
+  <div id="sub-labs" style="display:none">
+    <div class="card">
+      <div class="card-hdr">Lab Results — Last 6 Months</div>
+      <div class="lab-row" style="font-size:10px;color:#888;font-weight:700"><span>Test Name</span><span>Result</span><span>Flag</span><span>Collected</span></div>
+      <div class="lab-row"><span>HbA1c (LOINC 4548-4)</span><span class="lab-val high">8.7%</span><span class="lab-flag flag-h">H</span><span style="font-size:11px;color:#e74c3c">11/12/2025 — 112 days ago</span></div>
+      <div class="lab-row"><span>HbA1c (LOINC 4548-4)</span><span class="lab-val high">8.4%</span><span class="lab-flag flag-h">H</span><span style="font-size:11px;color:#888">08/01/2025</span></div>
+      <div class="lab-row"><span>Creatinine (LOINC 2160-0)</span><span class="lab-val">1.3 mg/dL</span><span class="lab-flag flag-h">H</span><span style="font-size:11px;color:#888">03/15/2026</span></div>
+      <div class="lab-row"><span>eGFR (LOINC 48643-1)</span><span class="lab-val">68 mL/min</span><span class="lab-flag flag-n">N</span><span style="font-size:11px;color:#888">03/15/2026</span></div>
+      <div class="lab-row"><span>Fasting glucose (LOINC 1558-6)</span><span class="lab-val high">214 mg/dL</span><span class="lab-flag flag-h">H</span><span style="font-size:11px;color:#888">04/03/2026</span></div>
+      <div class="lab-row"><span>LDL Cholesterol (LOINC 13457-7)</span><span class="lab-val">112 mg/dL</span><span class="lab-flag flag-h">H</span><span style="font-size:11px;color:#888">02/17/2026</span></div>
+      <div class="lab-row"><span>Urine microalbumin (LOINC 14957-5)</span><span class="lab-val high">82 mg/g</span><span class="lab-flag flag-h">H</span><span style="font-size:11px;color:#888">03/15/2026</span></div>
+    </div>
+  </div>
+
+  <!-- MEDS subtab -->
+  <div id="sub-meds" style="display:none">
+    <div class="card">
+      <div class="card-hdr">Active Medications</div>
+      <div class="prob-row" style="grid-template-columns:1fr 120px 80px"><span><strong>Metformin</strong> 1000mg PO BID — T2DM</span><span>RxNorm 860974</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row" style="grid-template-columns:1fr 120px 80px"><span><strong>Empagliflozin</strong> 10mg PO daily — T2DM, CKD</span><span>RxNorm 1545653</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row" style="grid-template-columns:1fr 120px 80px"><span><strong>Lisinopril</strong> 10mg PO daily — HTN, CKD</span><span>RxNorm 29046</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row" style="grid-template-columns:1fr 120px 80px"><span><strong>Atorvastatin</strong> 40mg PO daily — Hyperlipidemia</span><span>RxNorm 301542</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row" style="grid-template-columns:1fr 120px 80px"><span><strong>Gabapentin</strong> 300mg PO TID — Neuropathy pain</span><span>RxNorm 857386</span><span class="sev-tag sev-active">Active</span></div>
+      <div class="prob-row" style="grid-template-columns:1fr 120px 80px"><span><strong>Aspirin</strong> 81mg PO daily — Cardiovascular prevention</span><span>RxNorm 243670</span><span class="sev-tag sev-active">Active</span></div>
+    </div>
+  </div>
+
+  <!-- NOTES subtab -->
+  <div id="sub-notes" style="display:none">
+    <div class="card">
+      <div class="card-hdr">Progress Note — Today, Dr. Anita Patel</div>
+      <div style="font-size:12px;line-height:1.7;color:#333">
+        <p style="margin-bottom:8px"><strong>Chief Complaint:</strong> Worsening bilateral lower extremity pain, burning, and numbness x 3 months. Difficulty ambulating &gt;1 block.</p>
+        <p style="margin-bottom:8px"><strong>HPI:</strong> Ms. Torres is a 54-year-old woman with a 12-year history of T2DM (E11.65) complicated by peripheral neuropathy (E11.40) and nephropathy (E11.21). She presents today reporting progressive lower extremity symptoms that have not responded to increased gabapentin dosing and physical therapy over the past 8 weeks. She reports paresthesias to the mid-calf bilaterally, significant nighttime pain, and gait instability. Recent fasting glucose 214. HbA1c last drawn 112 days ago (8.7%).</p>
+        <p style="margin-bottom:8px"><strong>Assessment:</strong> Worsening diabetic peripheral neuropathy with suspected peripheral vascular component. Poorly controlled T2DM. Advanced imaging warranted to evaluate peripheral vascular anatomy and exclude structural/vascular etiology.</p>
+        <p><strong>Plan:</strong> Order MRI lower extremity bilateral. Review HbA1c — may need repeat given age of last result. Adjust diabetes management at follow-up pending imaging results. Refer to vascular surgery if imaging reveals significant PVD.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ORDER ENTRY TAB ═══════════ -->
+<div class="pane" id="tab-orders">
+  <div id="order-form-panel">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="card-hdr">New Imaging Order</div>
+          <div class="field">
+            <label>Ordering Physician</label>
+            <input type="text" value="Dr. Anita Patel — Endocrinology" readonly>
+          </div>
+          <div class="g2">
+            <div class="field">
+              <label>Payer / Plan</label>
+              <select id="o-payer">
+                <option value="BCBS_PPO">BCBS PPO Gold</option>
+                <option value="AETNA_HMO">Aetna HMO Select</option>
+                <option value="UNITED_PPO">UnitedHealth Choice Plus</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Priority</label>
+              <select id="o-priority">
+                <option>Routine</option>
+                <option>Urgent</option>
+                <option>STAT</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Procedure (CPT Code)</label>
+            <select id="o-cpt">
+              <option value="73721">73721 — MRI Lower Extremity Without Contrast</option>
+              <option value="74178">74178 — CT Abdomen &amp; Pelvis w/ and w/o Contrast</option>
+              <option value="72148">72148 — MRI Lumbar Spine Without Contrast</option>
+              <option value="99214">99214 — Office Visit, Established Patient</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Primary Diagnosis (ICD-10-CM)</label>
+            <select id="o-icd">
+              <option value="E11.65">E11.65 — T2DM with hyperglycemia</option>
+              <option value="E11.40">E11.40 — T2DM with diabetic neuropathy</option>
+              <option value="E11.21">E11.21 — T2DM with diabetic nephropathy</option>
+              <option value="E11.9">E11.9 — T2DM without complications (unspecified)</option>
+              <option value="E11.49">E11.49 — T2DM other neurological complication</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Clinical Indication (free text)</label>
+            <input type="text" value="Worsening lower extremity neuropathy, paresthesias, gait instability x 3 months" id="o-indication">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr">Clinical Data — Pre-Filled from Chart</div>
+          <div class="g2">
+            <div class="field">
+              <label>HbA1c Value (%)</label>
+              <input type="number" id="o-hba1c" step="0.1" value="8.7">
+            </div>
+            <div class="field">
+              <label>HbA1c Age (days)</label>
+              <input type="number" id="o-hba1cage" value="112">
+            </div>
+          </div>
+          <div class="field">
+            <label>Additional documentation in chart</label>
+            <div class="cb-group">
+              <label class="cb-item"><input type="checkbox" id="o-creat" checked> Creatinine on file (18d ago — 1.3 mg/dL)</label>
+              <label class="cb-item"><input type="checkbox" id="o-attest"> Physician attestation on file</label>
+              <label class="cb-item"><input type="checkbox" id="o-referral"> Specialist referral on file</label>
+              <label class="cb-item"><input type="checkbox" id="o-imaging"> Prior imaging on file</label>
+              <label class="cb-item"><input type="checkbox" id="o-therapy"> Conservative therapy documented (6+ weeks)</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn" style="flex:1" onclick="resetOrder()">Clear</button>
+          <button class="btn btn-primary btn-full" style="flex:2" onclick="runCDSCheck()" id="cds-btn">
+            Place Order — Run CDS Check
+          </button>
+        </div>
+        <div style="margin-top:8px">
+          <div class="sec-title">Demo scenarios</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
+            <button class="btn" style="text-align:left;font-size:11px" onclick="loadScenario('s1')">Scenario 1 — Torres: 2 items missing (HbA1c old + no attestation)</button>
+            <button class="btn" style="text-align:left;font-size:11px" onclick="loadScenario('s2')">Scenario 2 — All docs present, ready to submit</button>
+            <button class="btn" style="text-align:left;font-size:11px" onclick="loadScenario('s3')">Scenario 3 — No authorization required (office visit)</button>
+            <button class="btn" style="text-align:left;font-size:11px" onclick="loadScenario('s4')">Scenario 4 — Non-specific ICD code (E11.9 flagged)</button>
+            <button class="btn" style="text-align:left;font-size:11px" onclick="loadScenario('s5')">Scenario 5 — Aetna HMO, many items missing</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" id="cds-placeholder">
+          <div class="card-hdr">CDS Hooks — Authorization Check</div>
+          <div style="color:#aaa;font-size:12px;text-align:center;padding:40px 20px">
+            Place an order to see the real-time prior authorization alert card from the middleware.
+          </div>
+        </div>
+        <div id="cds-result" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documentation form panel -->
+  <div id="doc-form-panel" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <button class="btn btn-sm" onclick="backToOrder()">← Back to Order</button>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#1b3a5c">Prior Authorization Documentation Form</div>
+        <div style="font-size:11px;color:#888">SMART on FHIR — pre-populated from patient chart</div>
+      </div>
+    </div>
+    <div id="doc-form-content"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn" onclick="backToOrder()">Cancel</button>
+      <button class="btn btn-success" onclick="submitAuth()" id="submit-btn">Submit Prior Authorization</button>
+    </div>
+  </div>
+
+  <!-- Success panel -->
+  <div id="success-panel" style="display:none">
+    <div class="success-panel">
+      <div class="success-icon">✓</div>
+      <div class="success-title" id="suc-title">Prior Authorization Submitted</div>
+      <div id="suc-auth"></div>
+      <div class="success-msg" id="suc-msg"></div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn" onclick="showTab('dashboard')">View PA Dashboard</button>
+        <button class="btn btn-primary" onclick="resetOrder();document.getElementById('success-panel').style.display='none';document.getElementById('order-form-panel').style.display='block'">New Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DASHBOARD TAB ═══════════ -->
+<div class="pane" id="tab-dashboard">
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-lbl">Pending</div><div class="stat-val s-pend" id="d-pend">2</div></div>
+    <div class="stat-card"><div class="stat-lbl">Approved</div><div class="stat-val s-appr" id="d-appr">3</div></div>
+    <div class="stat-card"><div class="stat-lbl">Denied</div><div class="stat-val s-deny" id="d-deny">1</div></div>
+    <div class="stat-card"><div class="stat-lbl">Avg Decision</div><div class="stat-val s-total">1.4h</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">Prior Authorization Queue</div>
+    <table class="pa-table">
+      <thead><tr><th>Patient</th><th>CPT</th><th>ICD</th><th>Payer</th><th>Status</th><th>Auth #</th><th>Missing</th><th>Submitted</th></tr></thead>
+      <tbody id="pa-tbody">
+        <tr><td>Torres, Sandra</td><td><span class="code-badge">73721</span></td><td><span class="code-badge">E11.65</span></td><td>BCBS PPO</td><td><span class="status-badge sb-appr">Approved</span></td><td><span class="auth-num">AUTH-88421</span></td><td style="color:#27ae60;font-size:11px">None</td><td style="font-size:10px;color:#888">03/28 09:14</td></tr>
+        <tr><td>Patel, Ravi</td><td><span class="code-badge">74178</span></td><td><span class="code-badge">E11.21</span></td><td>Aetna HMO</td><td><span class="status-badge sb-pend">Pending</span></td><td style="color:#aaa;font-size:11px">—</td><td style="color:#e74c3c;font-size:11px">HbA1c · Creatinine</td><td style="font-size:10px;color:#888">03/30 14:22</td></tr>
+        <tr><td>Johnson, Maria</td><td><span class="code-badge">73721</span></td><td><span class="code-badge">E11.40</span></td><td>United PPO</td><td><span class="status-badge sb-appr">Approved</span></td><td><span class="auth-num">AUTH-88507</span></td><td style="color:#27ae60;font-size:11px">None</td><td style="font-size:10px;color:#888">03/31 11:05</td></tr>
+        <tr><td>Chen, David</td><td><span class="code-badge">72148</span></td><td><span class="code-badge">E11.65</span></td><td>BCBS PPO</td><td><span class="status-badge sb-deny">Denied</span></td><td style="color:#aaa;font-size:11px">—</td><td style="color:#e74c3c;font-size:11px">Conservative therapy</td><td style="font-size:10px;color:#888">04/01 08:30</td></tr>
+        <tr><td>Williams, Grace</td><td><span class="code-badge">73721</span></td><td><span class="code-badge">E11.49</span></td><td>Aetna HMO</td><td><span class="status-badge sb-pend">Pending</span></td><td style="color:#aaa;font-size:11px">—</td><td style="color:#e74c3c;font-size:11px">Referral · Prior imaging</td><td style="font-size:10px;color:#888">04/02 13:10</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ RULES DB TAB ═══════════ -->
+<div class="pane" id="tab-rules">
+  <div class="card" style="margin-bottom:10px;background:#e8f0f8;border-color:#b3cde0">
+    <div style="font-size:12px;color:#1b3a5c;line-height:1.6">
+      <strong>How the rules engine works:</strong> When an order is placed, the middleware looks up the row matching
+      <strong>Payer ID + CPT Code + ICD prefix</strong>. It then compares each submitted clinical value
+      against the rule requirements and flags any gaps as missing items in the CDS alert card.
+      This database is updated nightly via FHIR Bulk Data sync from each payer.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">Payer Authorization Rules — 8 Rules Loaded</div>
+    <div style="overflow-x:auto">
+      <table class="pa-table" style="font-size:11px">
+        <thead><tr><th>Payer</th><th>Plan</th><th>CPT</th><th>ICD Prefix</th><th>Auth Req.</th><th>HbA1c</th><th>Creatinine</th><th>Attestation</th><th>Prior Imaging</th><th>Last Updated</th></tr></thead>
+        <tbody>
+          <tr><td>BCBS</td><td>PPO Gold</td><td><span class="code-badge">73721</span></td><td>E11*</td><td><span class="status-badge sb-deny" style="font-size:9px">Required</span></td><td>≥7.5% / 90d</td><td>—</td><td>✓</td><td>—</td><td style="color:#888">2026-03-01</td></tr>
+          <tr><td>BCBS</td><td>PPO Gold</td><td><span class="code-badge">74178</span></td><td>E11*</td><td><span class="status-badge sb-deny" style="font-size:9px">Required</span></td><td>≥8.0% / 90d</td><td>✓ 30d</td><td>✓</td><td>—</td><td style="color:#888">2026-03-01</td></tr>
+          <tr><td>BCBS</td><td>PPO Gold</td><td><span class="code-badge">72148</span></td><td>E11*</td><td><span class="status-badge sb-deny" style="font-size:9px">Required</span></td><td>≥7.5% / 90d</td><td>—</td><td>✓</td><td>✓</td><td style="color:#888">2026-02-15</td></tr>
+          <tr><td>Aetna</td><td>HMO Select</td><td><span class="code-badge">73721</span></td><td>E11*</td><td><span class="status-badge sb-deny" style="font-size:9px">Required</span></td><td>≥8.0% / 60d</td><td>—</td><td>✓</td><td>✓</td><td style="color:#888">2026-02-20</td></tr>
+          <tr><td>Aetna</td><td>HMO Select</td><td><span class="code-badge">74178</span></td><td>E11*</td><td><span class="status-badge sb-deny" style="font-size:9px">Required</span></td><td>≥8.0% / 60d</td><td>✓ 14d</td><td>✓</td><td>—</td><td style="color:#888">2026-02-20</td></tr>
+          <tr><td>United</td><td>Choice Plus</td><td><span class="code-badge">73721</span></td><td>E11*</td><td><span class="status-badge sb-deny" style="font-size:9px">Required</span></td><td>≥7.0% / 90d</td><td>—</td><td>✓</td><td>—</td><td style="color:#888">2026-03-05</td></tr>
+          <tr><td>BCBS</td><td>PPO Gold</td><td><span class="code-badge">99214</span></td><td>E11*</td><td><span class="status-badge sb-appr" style="font-size:9px">Not Req.</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td style="color:#888">2026-01-01</td></tr>
+          <tr><td>United</td><td>Choice Plus</td><td><span class="code-badge">99214</span></td><td>E11*</td><td><span class="status-badge sb-appr" style="font-size:9px">Not Req.</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td style="color:#888">2026-01-01</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+var currentCard = null;
+var currentCtx  = null;
+var submissionCounter = 4;
+
+function tick(){
+  var n=new Date();
+  var h=String(n.getHours()).padStart(2,'0');
+  var m=String(n.getMinutes()).padStart(2,'0');
+  var s=String(n.getSeconds()).padStart(2,'0');
+  var el=document.getElementById('clock');
+  if(el) el.textContent=h+':'+m+':'+s;
+}
+tick(); setInterval(tick,1000);
+
+function showTab(t){
+  ['chart','orders','dashboard','rules'].forEach(function(x){
+    var p=document.getElementById('tab-'+x);
+    var n=document.getElementById('nav-'+x);
+    if(p) p.className='pane'+(x===t?' active':'');
+    if(n) n.className=(x===t?'active':'');
+  });
+  ['chart','orders','dashboard','rules'].forEach(function(x){
+    var s=document.querySelector('.sidebar-item[onclick*="'+x+'"]');
+  });
+}
+
+function showSubtab(t){
+  ['summary','problems','labs','meds','notes'].forEach(function(x){
+    var el=document.getElementById('sub-'+x);
+    var tab=document.getElementById('st-'+x);
+    if(el) el.style.display=(x===t?'block':'none');
+    if(tab) tab.className='tab'+(x===t?' active':'');
+  });
+}
+
+function setVal(id,val){var e=document.getElementById(id);if(e&&e.tagName==='SELECT'){for(var o of e.options){if(o.value===val){e.value=val;break;}}}else if(e){e.value=val;}}
+function setCb(id,v){var e=document.getElementById(id);if(e)e.checked=v;}
+
+var scenarios={
+  s1:{payer:'BCBS_PPO',cpt:'73721',icd:'E11.65',hba1c:8.7,hba1cage:112,creat:true,attest:false,ref:false,img:false,therapy:false},
+  s2:{payer:'BCBS_PPO',cpt:'73721',icd:'E11.40',hba1c:8.2,hba1cage:28,creat:false,attest:true,ref:false,img:false,therapy:false},
+  s3:{payer:'BCBS_PPO',cpt:'99214',icd:'E11.65',hba1c:8.7,hba1cage:112,creat:true,attest:false,ref:false,img:false,therapy:false},
+  s4:{payer:'UNITED_PPO',cpt:'73721',icd:'E11.9',hba1c:8.1,hba1cage:45,creat:false,attest:true,ref:false,img:false,therapy:false},
+  s5:{payer:'AETNA_HMO',cpt:'74178',icd:'E11.21',hba1c:null,hba1cage:null,creat:false,attest:false,ref:false,img:false,therapy:false},
+};
+
+function loadScenario(name){
+  showTab('orders');
+  var s=scenarios[name];
+  if(!s)return;
+  setVal('o-payer',s.payer);
+  setVal('o-cpt',s.cpt);
+  setVal('o-icd',s.icd);
+  document.getElementById('o-hba1c').value=s.hba1c||'';
+  document.getElementById('o-hba1cage').value=s.hba1cage||'';
+  setCb('o-creat',s.creat);setCb('o-attest',s.attest);
+  setCb('o-referral',s.ref);setCb('o-imaging',s.img);setCb('o-therapy',s.therapy);
+  document.getElementById('order-form-panel').style.display='block';
+  document.getElementById('doc-form-panel').style.display='none';
+  document.getElementById('success-panel').style.display='none';
+  setTimeout(runCDSCheck,200);
+}
+
+function runCDSCheck(){
+  var ctx={
+    payer_id:document.getElementById('o-payer').value,
+    cpt_code:document.getElementById('o-cpt').value,
+    icd_code:document.getElementById('o-icd').value,
+    hba1c_value:parseFloat(document.getElementById('o-hba1c').value)||null,
+    hba1c_days_ago:parseInt(document.getElementById('o-hba1cage').value)||null,
+    creatinine_present:document.getElementById('o-creat').checked,
+    has_attestation:document.getElementById('o-attest').checked,
+    has_referral:document.getElementById('o-referral').checked,
+    prior_imaging:document.getElementById('o-imaging').checked,
+    conservative_therapy:document.getElementById('o-therapy').checked,
+  };
+  currentCtx=ctx;
+  var card=evaluateLocal(ctx);
+  currentCard=card;
+  renderCDSCard(card);
+}
+
+var payerNames={'BCBS_PPO':'BCBS PPO Gold','AETNA_HMO':'Aetna HMO Select','UNITED_PPO':'UnitedHealth Choice Plus'};
+var cptDescs={'73721':'MRI Lower Extremity Without Contrast','74178':'CT Abdomen & Pelvis w/ and w/o Contrast','72148':'MRI Lumbar Spine Without Contrast','99214':'Office Visit – Established Patient'};
+var icdDescs={'E11.65':'T2DM with hyperglycemia','E11.40':'T2DM with diabetic neuropathy','E11.21':'T2DM with diabetic nephropathy','E11.9':'T2DM unspecified (non-specific)','E11.49':'T2DM other neurological complication'};
+
+var rules={
+  'BCBS_PPO:73721':  {auth:1,hba1c_req:1,hba1c_thr:7.5,hba1c_win:90,creat_req:0,attest_req:1,img_req:0,ref_req:0,therapy_req:0},
+  'BCBS_PPO:74178':  {auth:1,hba1c_req:1,hba1c_thr:8.0,hba1c_win:90,creat_req:1,creat_win:30,attest_req:1,img_req:0,ref_req:0,therapy_req:0},
+  'BCBS_PPO:72148':  {auth:1,hba1c_req:1,hba1c_thr:7.5,hba1c_win:90,creat_req:0,attest_req:1,img_req:0,ref_req:0,therapy_req:1},
+  'BCBS_PPO:99214':  {auth:0},
+  'AETNA_HMO:73721': {auth:1,hba1c_req:1,hba1c_thr:8.0,hba1c_win:60,creat_req:0,attest_req:1,img_req:1,ref_req:1,therapy_req:0},
+  'AETNA_HMO:74178': {auth:1,hba1c_req:1,hba1c_thr:8.0,hba1c_win:60,creat_req:1,creat_win:14,attest_req:1,img_req:0,ref_req:1,therapy_req:0},
+  'UNITED_PPO:73721':{auth:1,hba1c_req:1,hba1c_thr:7.0,hba1c_win:90,creat_req:0,attest_req:1,img_req:0,ref_req:0,therapy_req:0},
+  'UNITED_PPO:99214':{auth:0},
+};
+
+function evaluateLocal(ctx){
+  var key=ctx.payer_id+':'+ctx.cpt_code;
+  var rule=rules[key];
+  var cptDesc=cptDescs[ctx.cpt_code]||ctx.cpt_code;
+  var icdDesc=icdDescs[ctx.icd_code]||ctx.icd_code;
+  var pName=payerNames[ctx.payer_id]||ctx.payer_id;
+
+  if(!rule){
+    return{type:'unknown',summary:'Coverage requirements unknown',indicator:'info',detail:'No rule found for this CPT/payer combination. Verify directly with payer.',missing:[],present:[],cptDesc:cptDesc,icdDesc:icdDesc,pName:pName};
+  }
+  if(!rule.auth){
+    return{type:'no_auth',summary:'No prior authorization required',indicator:'info',detail:cptDesc+' is covered under '+pName+' without prior authorization.',missing:[],present:['Service covered — no authorization needed'],cptDesc:cptDesc,icdDesc:icdDesc,pName:pName};
+  }
+
+  var missing=[],present=[];
+
+  var specific=ctx.icd_code!=='E11.9'&&ctx.icd_code!=='E10.9';
+  if(specific) present.push('Diagnosis code specificity confirmed ('+ctx.icd_code+' — '+icdDesc+')');
+  else missing.push('Diagnosis code too non-specific ('+ctx.icd_code+'). Payer requires a complication-specific code such as E11.65, E11.40, or E11.21.');
+
+  if(rule.hba1c_req){
+    if(!ctx.hba1c_value||!ctx.hba1c_days_ago) missing.push('HbA1c result not found. Payer requires HbA1c within '+rule.hba1c_win+' days.');
+    else if(ctx.hba1c_days_ago>rule.hba1c_win) missing.push('HbA1c on file is '+ctx.hba1c_days_ago+' days old ('+ctx.hba1c_value.toFixed(1)+'%). Payer requires result within '+rule.hba1c_win+' days — consider ordering repeat.');
+    else if(ctx.hba1c_value<rule.hba1c_thr) missing.push('HbA1c '+ctx.hba1c_value.toFixed(1)+'% is below payer threshold of '+rule.hba1c_thr+'% required for this service.');
+    else present.push('HbA1c confirmed: '+ctx.hba1c_value.toFixed(1)+'% ('+ctx.hba1c_days_ago+'d ago, within '+rule.hba1c_win+'-day window)');
+  }
+
+  if(rule.creat_req){
+    if(ctx.creatinine_present) present.push('Creatinine on file — contrast clearance confirmed');
+    else missing.push('Creatinine required within '+(rule.creat_win||30)+' days for contrast clearance. Not found in chart.');
+  }
+
+  if(rule.attest_req){
+    if(ctx.has_attestation) present.push('Physician medical necessity attestation on file');
+    else missing.push('Physician medical necessity attestation required. Complete in documentation form.');
+  }
+
+  if(rule.ref_req){
+    if(ctx.has_referral) present.push('Specialist referral on file');
+    else missing.push('Specialist referral required for HMO plan. Referral must be on file before submission.');
+  }
+
+  if(rule.img_req){
+    if(ctx.prior_imaging) present.push('Prior imaging on file');
+    else missing.push('Prior imaging required (e.g. plain X-ray of affected extremity) before advanced imaging authorization.');
+  }
+
+  if(rule.therapy_req){
+    if(ctx.conservative_therapy) present.push('Conservative therapy documented (6+ weeks)');
+    else missing.push('Conservative therapy documentation required (minimum 6 weeks PT/medication management). Not found in chart.');
+  }
+
+  var n=missing.length;
+  var type,indicator,summary,detail;
+  if(n===0){
+    type='ready';indicator='info-ready';
+    summary='Prior authorization ready to submit';
+    detail='All documentation requirements for '+cptDesc+' are satisfied under '+pName+'. Proceed with submission.';
+  } else if(n<=2){
+    type='warning';indicator='warning';
+    summary='Prior authorization required — '+n+' item'+(n>1?'s':'')+' missing';
+    detail='Prior authorization required for '+cptDesc+' under '+pName+'. '+n+' documentation item'+(n>1?' are':' is')+' missing. Open the documentation form to complete.';
+  } else {
+    type='critical';indicator='critical';
+    summary='Prior authorization required — '+n+' items missing';
+    detail='Prior authorization required for '+cptDesc+' under '+pName+'. Multiple documentation requirements are not satisfied.';
+  }
+  return{type:type,summary:summary,indicator:indicator,detail:detail,missing:missing,present:present,cptDesc:cptDesc,icdDesc:icdDesc,pName:pName};
+}
+
+function renderCDSCard(card){
+  document.getElementById('cds-placeholder').style.display='none';
+  var el=document.getElementById('cds-result');
+  el.style.display='block';
+
+  var alertClass={
+    'no_auth':'alert-card alert-info','unknown':'alert-card alert-info',
+    'ready':'alert-card alert-ok','warning':'alert-card alert-warn','critical':'alert-card alert-critical'
+  }[card.type]||'alert-card alert-warn';
+  var indClass={
+    'no_auth':'indicator ind-info','unknown':'indicator ind-info',
+    'ready':'indicator ind-ok','warning':'indicator ind-warn','critical':'indicator ind-crit'
+  }[card.type]||'indicator ind-warn';
+  var indTxt={
+    'no_auth':'Info','unknown':'Info',
+    'ready':'Ready','warning':'Warning','critical':'Action Required'
+  }[card.type]||'Warning';
+
+  var missingHtml='';
+  if(card.missing&&card.missing.length>0){
+    missingHtml='<div class="items-label miss" style="margin-bottom:4px">Missing / action required</div><ul class="item-list">'
+      +card.missing.map(function(m){return'<li><span class="dot dot-red"></span>'+m+'</li>';}).join('')+'</ul>';
+  }
+  var presentHtml='';
+  if(card.present&&card.present.length>0){
+    presentHtml='<div class="items-label pres" style="margin-bottom:4px;margin-top:8px">Confirmed present</div><ul class="item-list">'
+      +card.present.map(function(p){return'<li><span class="dot dot-green"></span>'+p+'</li>';}).join('')+'</ul>';
+  }
+
+  var actionsHtml='';
+  if(card.type==='ready'||card.type==='warning'||card.type==='critical'){
+    actionsHtml='<div class="alert-actions">'
+      +'<button class="btn btn-primary btn-sm" onclick="openDocForm()">Open Documentation Form</button>'
+      +'<button class="btn btn-sm" onclick="dismissCard()">Dismiss</button>'
+      +'</div>';
+  }
+
+  el.innerHTML='<div class="card"><div class="card-hdr">CDS Hooks — Authorization Check</div>'
+    +'<div class="'+alertClass+'">'
+    +'<div class="alert-hdr"><div class="alert-title">'+card.summary+'</div><span class="'+indClass+'">'+indTxt+'</span></div>'
+    +'<div class="alert-body">'+card.detail+'</div>'
+    +'<div style="font-size:11px;color:#555;margin-bottom:6px"><span class="code-badge">'+currentCtx.cpt_code+'</span> '+card.cptDesc+' &nbsp;|&nbsp; <span class="code-badge">'+currentCtx.icd_code+'</span> '+card.icdDesc+'</div>'
+    +missingHtml+presentHtml+actionsHtml
+    +'</div></div>';
+}
+
+function dismissCard(){
+  document.getElementById('cds-result').style.display='none';
+  document.getElementById('cds-placeholder').style.display='block';
+}
+
+function openDocForm(){
+  document.getElementById('order-form-panel').style.display='none';
+  document.getElementById('doc-form-panel').style.display='block';
+  buildDocForm();
+}
+
+function backToOrder(){
+  document.getElementById('doc-form-panel').style.display='none';
+  document.getElementById('order-form-panel').style.display='block';
+}
+
+function buildDocForm(){
+  var card=currentCard;
+  var html='';
+
+  html+='<div class="form-section"><div class="form-sec-title">Order summary</div>'
+    +'<div class="g2">'
+    +'<div><div style="font-size:11px;color:#888">Patient</div><div style="font-size:12px;font-weight:700">Torres, Sandra M. (PT-88204)</div></div>'
+    +'<div><div style="font-size:11px;color:#888">Payer</div><div style="font-size:12px;font-weight:700">'+card.pName+'</div></div>'
+    +'<div><div style="font-size:11px;color:#888">Procedure (CPT)</div><div style="font-size:12px"><span class="code-badge">'+currentCtx.cpt_code+'</span> '+card.cptDesc+'</div></div>'
+    +'<div><div style="font-size:11px;color:#888">Diagnosis (ICD-10)</div><div style="font-size:12px"><span class="code-badge">'+currentCtx.icd_code+'</span> '+card.icdDesc+'</div></div>'
+    +'</div></div>';
+
+  if(card.present&&card.present.length>0){
+    html+='<div class="form-section"><div class="form-sec-title">Confirmed — pre-populated from EHR chart</div>';
+    card.present.forEach(function(p){
+      html+='<div class="confirmed-item"><span class="conf-check">✓</span><span>'+p+'</span></div>';
+    });
+    html+='</div>';
+  }
+
+  if(card.missing&&card.missing.length>0){
+    html+='<div class="form-section"><div class="form-sec-title">Action required — complete missing documentation</div>';
+    card.missing.forEach(function(m,i){
+      var lower=m.toLowerCase();
+      var input='';
+      if(lower.indexOf('hba1c')>=0||lower.indexOf('lab')>=0){
+        input='<input type="date" class="miss-input" id="mf_'+i+'" placeholder="Lab order / result date">';
+      } else if(lower.indexOf('referral')>=0){
+        input='<select class="miss-input" id="mf_'+i+'"><option value="">Select referral status...</option><option>Referral submitted to payer</option><option>Referral on file from PCP</option><option>Referral request pending</option></select>';
+      } else if(lower.indexOf('imaging')>=0||lower.indexOf('x-ray')>=0){
+        input='<select class="miss-input" id="mf_'+i+'"><option value="">Select prior imaging status...</option><option>Prior imaging report on file</option><option>Prior imaging ordered today</option><option>External imaging — requesting records</option></select>';
+      } else if(lower.indexOf('conservative')>=0||lower.indexOf('therapy')>=0){
+        input='<textarea class="miss-input" id="mf_'+i+'" placeholder="Describe conservative treatment: modality, duration, provider, outcome..."></textarea>';
+      } else if(lower.indexOf('specific')>=0||lower.indexOf('diagnosis')>=0){
+        input='<select class="miss-input" id="mf_'+i+'"><option value="">Select corrected ICD-10-CM code...</option><option value="E11.65">E11.65 — T2DM with hyperglycemia</option><option value="E11.40">E11.40 — T2DM with diabetic neuropathy</option><option value="E11.21">E11.21 — T2DM with diabetic nephropathy</option><option value="E11.22">E11.22 — T2DM with diabetic CKD stage 3</option></select>';
+      } else {
+        input='<textarea class="miss-input" id="mf_'+i+'" placeholder="Provide documentation or clinical context..."></textarea>';
+      }
+      html+='<div class="missing-item-form"><div class="miss-lbl">Item '+(i+1)+'</div><div class="miss-desc">'+m+'</div>'+input+'</div>';
+    });
+    html+='</div>';
+  }
+
+  html+='<div class="form-section"><div class="form-sec-title">Physician medical necessity attestation</div>'
+    +'<div class="missing-item-form"><div class="miss-lbl">Clinical narrative (required)</div>'
+    +'<div class="miss-desc">Describe the clinical indication, diabetes history, documented complications, and medical necessity for the requested imaging.</div>'
+    +'<textarea class="miss-input" id="attestation" style="min-height:70px" placeholder="Patient is a 54-year-old woman with 12-year history of T2DM complicated by peripheral neuropathy (E11.40) and nephropathy (E11.21). Worsening lower extremity symptoms with paresthesias and gait instability x 3 months. Conservative management (gabapentin, PT) pursued for 8 weeks without adequate response. MRI indicated to evaluate peripheral vascular anatomy and exclude structural etiology..."></textarea>'
+    +'</div></div>';
+
+  document.getElementById('doc-form-content').innerHTML=html;
+}
+
+function submitAuth(){
+  var attest=document.getElementById('attestation');
+  if(!attest||!attest.value.trim()){
+    alert('Please complete the physician attestation before submitting.');
+    return;
+  }
+  var btn=document.getElementById('submit-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Submitting...';
+
+  setTimeout(function(){
+    var authNum='AUTH-'+Math.floor(10000+Math.random()*90000);
+    var missingRemaining=(currentCard&&currentCard.missing)?currentCard.missing.filter(function(m,i){
+      var el=document.getElementById('mf_'+i);
+      return !el||!el.value.trim();
+    }):[];
+
+    submissionCounter++;
+    var tbody=document.getElementById('pa-tbody');
+    if(tbody){
+      var newRow=document.createElement('tr');
+      var status=missingRemaining.length===0?'Approved':'Pending';
+      var sbClass=status==='Approved'?'sb-appr':'sb-pend';
+      var authDisplay=status==='Approved'?'<span class="auth-num">'+authNum+'</span>':'<span style="color:#aaa;font-size:11px">—</span>';
+      var missDisp=missingRemaining.length===0?'<span style="color:#27ae60;font-size:11px">None</span>':'<span style="color:#e74c3c;font-size:11px">'+missingRemaining.length+' item(s)</span>';
+      newRow.innerHTML='<td>Torres, Sandra</td><td><span class="code-badge">'+currentCtx.cpt_code+'</span></td><td><span class="code-badge">'+currentCtx.icd_code+'</span></td><td>'+currentCard.pName+'</td><td><span class="status-badge '+sbClass+'">'+status+'</span></td><td>'+authDisplay+'</td><td>'+missDisp+'</td><td style="font-size:10px;color:#888">just now</td>';
+      tbody.insertBefore(newRow,tbody.firstChild);
+      var pend=parseInt(document.getElementById('d-pend').textContent)||0;
+      var appr=parseInt(document.getElementById('d-appr').textContent)||0;
+      if(status==='Approved'){document.getElementById('d-appr').textContent=appr+1;}
+      else{document.getElementById('d-pend').textContent=pend+1;}
+    }
+
+    document.getElementById('doc-form-panel').style.display='none';
+    document.getElementById('success-panel').style.display='block';
+    if(missingRemaining.length===0){
+      document.getElementById('suc-title').textContent='Prior Authorization Approved';
+      document.getElementById('suc-auth').innerHTML='<div class="auth-number-display">'+authNum+'</div><div style="font-size:11px;color:#555;margin-bottom:8px">Authorization number written back to EHR order</div>';
+      document.getElementById('suc-msg').textContent='All documentation requirements were satisfied. The authorization number has been attached to the pending order for CPT '+currentCtx.cpt_code+'. The scheduling team may proceed with appointment booking for Ms. Torres.';
+    } else {
+      document.getElementById('suc-title').textContent='Authorization Submitted — Pending Review';
+      document.getElementById('suc-auth').innerHTML='<div style="font-size:12px;color:#888;margin:8px 0">Estimated payer decision: 24–72 hours</div>';
+      document.getElementById('suc-msg').textContent='The authorization request has been submitted. '+missingRemaining.length+' documentation item(s) were incomplete at submission. The payer may request additional information before issuing a decision.';
+    }
+    btn.disabled=false;
+    btn.innerHTML='Submit Prior Authorization';
+  }, 1400);
+}
+
+function resetOrder(){
+  document.getElementById('cds-placeholder').style.display='block';
+  document.getElementById('cds-result').style.display='none';
+  currentCard=null; currentCtx=null;
+}
+</script>
